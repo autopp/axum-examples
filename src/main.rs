@@ -1,6 +1,9 @@
 use std::io::ErrorKind;
 
 use axum::body::{Body, Bytes};
+use axum::extract::Path;
+use axum::http::uri::PathAndQuery;
+use axum::http::{HeaderMap, Method, Uri};
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::post;
 use axum::{extract::Request, routing::get, Router};
@@ -24,11 +27,11 @@ fn echo_request_router() -> Router {
     Router::new().route("/echo", get(echo_request))
 }
 
-async fn echo_request(req: Request) -> Json<Value> {
+async fn echo_request(method: Method, uri: Uri, headers: HeaderMap) -> Json<Value> {
     Json(json!({
-        "method": req.method().as_str(),
-        "uri": req.uri().to_string(),
-        "headers": req.headers().iter().map(|(k, v)| (k.as_str(), v.to_str().unwrap())).collect::<Vec<_>>(),
+        "method": method.as_str(),
+        "uri": uri.to_string(),
+        "headers": headers.iter().map(|(k, v)| (k.as_str(), v.to_str().unwrap())).collect::<Vec<_>>(),
     }))
 }
 
